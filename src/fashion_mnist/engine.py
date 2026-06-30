@@ -4,7 +4,6 @@ from torch.utils.data import DataLoader
 def train_one_epoch(dataloader: DataLoader, model: torch.nn.Module, loss_fn: torch.nn.Module, optimizer: torch.optim.Optimizer, device: str) -> float:
     model.train()
     running_loss = 0.0
-    total_loss = 0.0
 
     for X, y in dataloader:
         X, y = X.to(device), y.to(device)
@@ -14,7 +13,7 @@ def train_one_epoch(dataloader: DataLoader, model: torch.nn.Module, loss_fn: tor
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
-        total_loss += loss.item()
+    return running_loss / len(dataloader)
 
 def evaluate(dataloader: DataLoader, model: torch.nn.Module, loss_fn: torch.nn.Module, device: str) -> tuple[float, float]:
     model.eval()
