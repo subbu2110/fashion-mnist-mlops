@@ -4,7 +4,7 @@ from fashion_mnist.data import get_dataloaders
 from fashion_mnist.model import FashionClassifier
 from fashion_mnist.engine import train_one_epoch, evaluate
 from fashion_mnist.config import Config
-from fashion_mnist.utils import set_seed, get_device
+from fashion_mnist.utils import set_seed, get_device, save_model
 
 def main():
     config = Config()
@@ -18,8 +18,10 @@ def main():
     for epoch in range(1, config.epochs + 1):
         train_loss = train_one_epoch(train_loader, model, loss_fn, optimizer, device)
         test_loss, test_accuracy = evaluate(test_loader, model, loss_fn, device)
-        print(f"Epoch {epoch}/{config.epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.4f}")
+        print(f"Epoch {epoch:>2}/{config.epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.2%}")
     print("Training complete")
+    save_model(model, config.model_dir / "model.pth")
+    print(f"Model saved to {config.model_dir / 'model.pth'}")
 
 if __name__ == "__main__":
     main()
