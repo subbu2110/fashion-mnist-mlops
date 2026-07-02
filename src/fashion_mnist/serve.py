@@ -1,6 +1,6 @@
-from contextlib import asynccontextmanager
+from functools import lru_cache
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Request
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 
 from fashion_mnist.config import Config
 from fashion_mnist.model import FashionClassifier
@@ -10,21 +10,13 @@ from fashion_mnist.predict import predict_image
 cfg = Config()
 device = get_device()
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Runs once at startup — load weights into app state.
-    model_path = cfg.model_dir / "model.pth"
-    app.state.model = load_model(FashionClassifier(), model_path, device)
-    yield
-    # (cleanup would go here on shutdown)
+app = FastAPI(title="FashionMNIST Classifier")
 
 
-app = FastAPI(title="FashionMNIST Classifier", lifespan=lifespan)
-
-
-def get_model(request: Request):
-    return request.app.state.model
+@lru_cache
+def get_model():
+    """Load the model once, on first request. Cached for all later calls."""
+    return load_model(FashionClassifier(), cfg.model_dir / "model.pth", device)
 
 
 @app.get("/health")
